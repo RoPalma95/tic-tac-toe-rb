@@ -7,22 +7,15 @@ class Match
   public
   attr_reader :player1, :player2
 
-  @@winner = false
-
   def initialize
     print "Player 1>> "
     @player1 = Player.new(1)
+
     print "Player 2>> "
     @player2 = Player.new(2)
     puts "\n"
 
-    @board = [[1, 2, "X"], [4, 5, "X"], [7, 8, "X"]]
-    # @board = Array.new(3) { Array.new(3) {0}}
-    # for i in 0..2
-    #   for j in 0..2
-    #     @board[j][i] = 3 * j + i + 1
-    #   end
-    # end
+    @board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
   end
 
   def print_board
@@ -86,7 +79,6 @@ class Match
       else
         win
       end
-      # binding.pry
     end
   end
 
@@ -97,20 +89,22 @@ class Match
         flipped_board[i][j] = board[j][i] 
       end
     end
-    # binding.pry
     check_rows(player_number, flipped_board)
   end
 
   def check_diagonals(player_number)
     player = select_player(player_number)
-    win = true
+    diagonal1 = []
+    diagonal2 = []
     for i in 0..2
-      if board[i][i] != player.sign || board[2 - i][2 - 1] != player.sign
-        win = false
+      if board[i][i] == player.sign
+        diagonal1.push(board[i][i])
+      end
+      if board[i][2 - i] == player.sign
+        diagonal2.push(board[i][2 - i])
       end
     end
-    win
-    # binding.pry
+    diagonal1.length == 3 || diagonal2.length == 3
   end
 
   def winner(player_number)
