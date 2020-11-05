@@ -78,7 +78,7 @@ class Match
     end
   end
 
-  #PRUBLIC METHODS
+  #PUBLIC METHODS
 
   public
   def print_board
