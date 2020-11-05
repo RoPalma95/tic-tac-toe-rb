@@ -1,11 +1,12 @@
 require 'pry'
+
 class Match
   private
-  attr_accessor :board
-  attr_writer :winner, :unavailable_cells
+  attr_accessor :board, :unavailable_cells
+  attr_writer :winner
 
   public
-  attr_reader :player1, :player2, :winner, :unavailable_cells
+  attr_reader :player1, :player2, :winner
 
   def initialize
     print "Player 1>> "
@@ -20,64 +21,9 @@ class Match
     @winner = ""
   end
 
-  def print_board
-    puts "\n"
-    board.each_with_index do |row, i|
-      unless i == 2
-        puts "\t     |     |"
-        puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
-        puts "\t_____|_____|_____"
-      else
-        puts "\t     |     |"
-        puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
-        puts "\t     |     |     "
-      end
-    end
-    puts "\n"
-  end
+  #PRIVATE METHODS
 
-  def is_move_available?(move)
-    board.reduce(false) do |valid, row|
-      unless valid
-        row.include?(move)
-      else
-        valid
-      end
-    end
-  end
-
-  def select_player(player_number)
-    if player_number == 1
-      player1
-    else
-      player2
-    end
-  end
-
-  def update_board(player_number)
-    player = select_player(player_number)
-    moved = false
-
-    until moved
-      move = player.make_move.to_i
-      if is_move_available?(move)
-        board.map! do |row|
-          row.map! do |cell|
-            if cell == move
-              self.unavailable_cells.push(cell)
-              cell = player.sign
-            else
-              cell
-            end
-          end
-        end
-        moved = true
-      else
-        puts "\n\tCell is unavailable. Pick a different one.\n"
-      end
-    end
-  end
-
+  private
   def check_rows(player_number, cols = @board)
     player = select_player(player_number)
     cols.reduce(false) do |win, row|
@@ -114,6 +60,67 @@ class Match
     diagonal1.length == 3 || diagonal2.length == 3
   end
 
+  def is_move_available?(move)
+    board.reduce(false) do |valid, row|
+      unless valid
+        row.include?(move)
+      else
+        valid
+      end
+    end
+  end
+
+  def select_player(player_number)
+    if player_number == 1
+      player1
+    else
+      player2
+    end
+  end
+
+  #PRUBLIC METHODS
+
+  public
+  def print_board
+    puts "\n"
+    board.each_with_index do |row, i|
+      unless i == 2
+        puts "\t     |     |"
+        puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
+        puts "\t_____|_____|_____"
+      else
+        puts "\t     |     |"
+        puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
+        puts "\t     |     |     "
+      end
+    end
+    puts "\n"
+  end
+
+  def update_board(player_number)
+    player = select_player(player_number)
+    moved = false
+
+    until moved
+      move = player.make_move.to_i
+      if is_move_available?(move)
+        board.map! do |row|
+          row.map! do |cell|
+            if cell == move
+              self.unavailable_cells.push(cell)
+              cell = player.sign
+            else
+              cell
+            end
+          end
+        end
+        moved = true
+      else
+        puts "\n\tCell is unavailable. Pick a different one.\n"
+      end
+    end
+  end
+
   def winner?(player_number)
     if check_rows(player_number) || check_columns(player_number) || check_diagonals(player_number)
       self.winner = select_player(player_number)
@@ -125,10 +132,7 @@ class Match
   end
 
   def reset_board
-    @row1 = [1, 2, 3]
-    @row2 = [4, 5, 6]
-    @row3 = [7, 8, 9]
-    @board = [@row1, @row2, @row3]
+    @board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
   end
 end
 
