@@ -1,11 +1,11 @@
 require 'pry'
-
 class Match
   private
   attr_accessor :board
+  attr_writer :winner, :unavailable_cells
 
   public
-  attr_reader :player1, :player2
+  attr_reader :player1, :player2, :winner, :unavailable_cells
 
   def initialize
     print "Player 1>> "
@@ -16,6 +16,8 @@ class Match
     puts "\n"
 
     @board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    @unavailable_cells = []
+    @winner = ""
   end
 
   def print_board
@@ -35,7 +37,7 @@ class Match
   end
 
   def is_move_available?(move)
-    board.reduce(false) do |valid, row| 
+    board.reduce(false) do |valid, row|
       unless valid
         row.include?(move)
       else
@@ -46,28 +48,33 @@ class Match
 
   def select_player(player_number)
     if player_number == 1
-      player = player1
+      player1
     else
-      player = player2
+      player2
     end
   end
 
   def update_board(player_number)
     player = select_player(player_number)
-    move = player.make_move.to_i
+    moved = false
 
-    if is_move_available?(move)
-      board.map! do |row|
-        row.map! do |cell|
-          if cell == move
-            cell = player.sign
-          else
-            cell
+    until moved
+      move = player.make_move.to_i
+      if is_move_available?(move)
+        board.map! do |row|
+          row.map! do |cell|
+            if cell == move
+              self.unavailable_cells.push(cell)
+              cell = player.sign
+            else
+              cell
+            end
           end
         end
+        moved = true
+      else
+        puts "\n\tCell is unavailable. Pick a different one.\n"
       end
-    else
-      puts "\n\tCell is unavailable. Pick a different one."
     end
   end
 
@@ -86,7 +93,7 @@ class Match
     flipped_board = Array.new(3) { Array.new(3) {0}}
     for i in 0..2
       for j in 0..2
-        flipped_board[i][j] = board[j][i] 
+        flipped_board[i][j] = board[j][i]
       end
     end
     check_rows(player_number, flipped_board)
@@ -107,8 +114,14 @@ class Match
     diagonal1.length == 3 || diagonal2.length == 3
   end
 
-  def winner(player_number)
-    check_rows(player_number) || check_columns(player_number) || check_diagonals(player_number)
+  def winner?(player_number)
+    if check_rows(player_number) || check_columns(player_number) || check_diagonals(player_number)
+      self.winner = select_player(player_number)
+      true
+    elsif unavailable_cells.length == 9
+      self.winner = "Tie"
+      true
+    end
   end
 
   def reset_board
@@ -138,13 +151,32 @@ class Player
 end
 
 round = Match.new
-winner = false
-puts "Xs: #{round.player1.name}\tOs: #{round.player2.name}"
-round.print_board
-puts round.winner(1)
-# until winner
-#   round.update_board(1)
-#   round.print_board
-#   round.update_board(2)
-#   round.print_board
-# end
+puts "\tXs: #{round.player1.name}\tOs: #{round.player2.name}"
+
+loop do
+  winner = false
+  round.print_board
+  player = 1
+
+  until winner
+    round.update_board(player)
+    round.print_board
+    winner = round.winner?(player)
+    if player == 1
+      player = 2
+    else
+      player = 1
+    end
+  end
+
+  unless round.winner == "Tie"
+    puts "You win, #{round.winner.name}!"
+  else
+    puts "It's a tie."
+  end
+  puts "Want to play another round? (y/n)"
+  again = gets.chomp.upcase
+
+  break if again == 'N'
+  round.reset_board
+end
