@@ -2,43 +2,46 @@ require 'pry'
 
 class Match
   private
+
   attr_accessor :board, :unavailable_cells
   attr_writer :winner
 
   public
+
   attr_reader :player1, :player2, :winner
 
   def initialize
-    print "Player 1>> "
+    print 'Player 1>> '
     @player1 = Player.new(1)
 
-    print "Player 2>> "
+    print 'Player 2>> '
     @player2 = Player.new(2)
     puts "\n"
 
     @board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     @unavailable_cells = []
-    @winner = ""
+    @winner = ''
   end
 
-  #PRIVATE METHODS
+  # PRIVATE METHODS
 
   private
+
   def check_rows(player_number, cols = @board)
     player = select_player(player_number)
     cols.reduce(false) do |win, row|
-      unless win == true
-        row.all?(player.sign)
-      else
+      if win == true
         win
+      else
+        row.all?(player.sign)
       end
     end
   end
 
   def check_columns(player_number)
-    flipped_board = Array.new(3) { Array.new(3) {0}}
-    for i in 0..2
-      for j in 0..2
+    flipped_board = Array.new(3) { Array.new(3) { 0 } }
+    (0..2).each do |i|
+      (0..2).each do |j|
         flipped_board[i][j] = board[j][i]
       end
     end
@@ -49,24 +52,16 @@ class Match
     player = select_player(player_number)
     diagonal1 = []
     diagonal2 = []
-    for i in 0..2
-      if board[i][i] == player.sign
-        diagonal1.push(board[i][i])
-      end
-      if board[i][2 - i] == player.sign
-        diagonal2.push(board[i][2 - i])
-      end
+    (0..2).each do |i|
+      diagonal1.push(board[i][i]) if board[i][i] == player.sign
+      diagonal2.push(board[i][2 - i]) if board[i][2 - i] == player.sign
     end
     diagonal1.length == 3 || diagonal2.length == 3
   end
 
-  def is_move_available?(move)
+  def move_available?(move)
     board.reduce(false) do |valid, row|
-      unless valid
-        row.include?(move)
-      else
-        valid
-      end
+      valid || row.include?(move)
     end
   end
 
@@ -78,20 +73,18 @@ class Match
     end
   end
 
-  #PUBLIC METHODS
+  # PUBLIC METHODS
 
   public
+
   def print_board
-    puts "\n"
     board.each_with_index do |row, i|
-      unless i == 2
-        puts "\t     |     |"
-        puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
-        puts "\t_____|_____|_____"
-      else
-        puts "\t     |     |"
-        puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
+      puts "\t     |     |"
+      puts "\t  #{row[0]}  |  #{row[1]}  |  #{row[2]}"
+      if i == 2
         puts "\t     |     |     "
+      else
+        puts "\t_____|_____|_____"
       end
     end
     puts "\n"
@@ -103,12 +96,12 @@ class Match
 
     until moved
       move = player.make_move.to_i
-      if is_move_available?(move)
+      if move_available?(move)
         board.map! do |row|
           row.map! do |cell|
             if cell == move
-              self.unavailable_cells.push(cell)
-              cell = player.sign
+              unavailable_cells.push(cell)
+              player.sign
             else
               cell
             end
@@ -126,14 +119,14 @@ class Match
       self.winner = select_player(player_number)
       true
     elsif unavailable_cells.length == 9
-      self.winner = "Tie"
+      self.winner = 'Tie'
       true
     end
   end
 
   def reset_board
     self.board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    self.unavailable_cells.clear
+    unavailable_cells.clear
   end
 end
 
@@ -142,11 +135,11 @@ class Player
 
   def initialize(player_number)
     @name = gets.chomp
-    if player_number == 1
-      @sign = "X"
-    else
-      @sign = "O"
-    end
+    @sign = if player_number == 1
+              'X'
+            else
+              'O'
+            end
   end
 
   def make_move
@@ -156,7 +149,7 @@ class Player
 end
 
 round = Match.new
-puts "\tXs: #{round.player1.name}\tOs: #{round.player2.name}"
+puts "\tXs: #{round.player1.name}\tOs: #{round.player2.name}\n\n"
 
 loop do
   winner = false
@@ -167,21 +160,22 @@ loop do
     round.update_board(player)
     round.print_board
     winner = round.winner?(player)
-    if player == 1
-      player = 2
-    else
-      player = 1
-    end
+    player = if player == 1
+               2
+             else
+               1
+             end
   end
 
-  unless round.winner == "Tie"
-    puts "You win, #{round.winner.name}!"
-  else
+  if round.winner == 'Tie'
     puts "It's a tie."
+  else
+    puts "You win, #{round.winner.name}!"
   end
-  puts "Want to play another round? (y/n)"
+  puts 'Want to play another round? (y/n)'
   again = gets.chomp.upcase
 
   break if again == 'N'
+
   round.reset_board
 end
