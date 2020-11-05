@@ -132,7 +132,8 @@ class Match
   end
 
   def reset_board
-    @board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    self.board = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    self.unavailable_cells.clear
   end
 end
 
