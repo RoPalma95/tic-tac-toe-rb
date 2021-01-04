@@ -1,3 +1,4 @@
+
 require 'pry'
 
 class Match
@@ -25,11 +26,11 @@ class Match
 
   # PRIVATE METHODS
 
-  private
+  # private
 
-  def check_rows(player_number, cols = @board)
+  def check_rows(player_number, rows = @board)
     player = select_player(player_number)
-    cols.reduce(false) do |win, row|
+    rows.reduce(false) do |win, row|
       if win == true
         win
       else
@@ -75,7 +76,7 @@ class Match
 
   # PUBLIC METHODS
 
-  public
+  # public
 
   def print_board
     board.each_with_index do |row, i|
@@ -130,52 +131,3 @@ class Match
   end
 end
 
-class Player
-  attr_reader :name, :sign
-
-  def initialize(player_number)
-    @name = gets.chomp
-    @sign = if player_number == 1
-              'X'
-            else
-              'O'
-            end
-  end
-
-  def make_move
-    print "#{name}, input the cell you want to take>> "
-    gets.chomp
-  end
-end
-
-round = Match.new
-puts "\tXs: #{round.player1.name}\tOs: #{round.player2.name}\n\n"
-
-loop do
-  winner = false
-  round.print_board
-  player = 1
-
-  until winner
-    round.update_board(player)
-    round.print_board
-    winner = round.winner?(player)
-    player = if player == 1
-               2
-             else
-               1
-             end
-  end
-
-  if round.winner == 'Tie'
-    puts "It's a tie."
-  else
-    puts "You win, #{round.winner.name}!"
-  end
-  puts 'Want to play another round? (y/n)'
-  again = gets.chomp.upcase
-
-  break if again == 'N'
-
-  round.reset_board
-end
